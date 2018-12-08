@@ -1,17 +1,13 @@
 #include <iostream>
 #include <ctime>
+#include <cmath>
 #include <blocked_range.h>
 #include <parallel_reduce.h>
 
-using namespace std;
-using namespace tbb;
-
-
-namespace {
-    const double x_min = 2;
-    const double x_max = 6;
-    const double y_min = 1;
-    const double y_max = 4;
+    const double X_MIN = 2;
+    const double X_MAX = 6;
+    const double Y_MIN = 1;
+    const double Y_MAX = 4;
 
     /// Generate random numbers from `a` to `b`.
     inline double random(const double a, const double b) {
@@ -45,7 +41,7 @@ namespace {
 
     /// Compute the area for given hits.
     inline double area_of(const unsigned hits, const unsigned total) {
-        return (x_max - x_min) * (y_max - y_min) * hits / total;
+        return (X_MAX - X_MIN) * (Y_MAX - Y_MIN) * hits / total;
     }
 
 } // local namespace
@@ -57,20 +53,20 @@ class AreaComputer {
 public:
 
     /// Initialize the computation for N points.
-    Computer(const unsigned n)
+    AreaComputer(const unsigned n)
         : N(n)
         , sum(0)
     { }
 
     /// Initialize the computation for N points by splitting a bigger one.
-    Computer(const Computer c, const unsigned split)
-        : N(n)
+    AreaComputer(AreaComputer& c, tbb::split split)
+        : N(c.N)
         , sum(0)
     { }
 
     /// Perform the actual computation (the functor).
-    void operator ()(const blocked_range<unsigned>& r) {
-        sum = area_hits(r.begin(), r.end(), N);
+    void operator ()(const tbb::blocked_range<unsigned>& r) {
+        sum = area_of(area_hits(r.begin(), r.end()), N);
     }
 
     /// Join results of two computations.
@@ -100,16 +96,16 @@ int main() {
     // Method 1: direct computation.
     {
         int area = round(area_of(area_hits(0, N), N));
-        cout << area << endl;
+        std::cout << area << std::endl;
     }
 
     // Method 2: parallel computation using lambda functions.
     {
-        int hits = parallel_reduce(
-            blocked_range<unsigned>(0, N),
+        int hits = tbb::parallel_reduce(
+            tbb::blocked_range<unsigned>(0, N),
             0,
 
-            [=](const blocked_range<unsigned>& r, unsigned hits) {
+            [=](const tbb::blocked_range<unsigned>& r, unsigned hits) {
                 return hits + area_hits(r.begin(), r.end());
             },
 
@@ -118,15 +114,15 @@ int main() {
             }
         );
         int area = round(area_of(hits, N));
-        cout << area << endl;
+        std::cout << area << std::endl;
     }
 
     // Method 3: use class.
     {
         AreaComputer ac(N);
-        parallel_reduce(blocked_range<unsigned>(0, N), ac);
+        tbb::parallel_reduce(tbb::blocked_range<unsigned>(0, N), ac);
         int area = round(ac.result());
-        cout << area << endl;
+        std::cout << area << std::endl;
     }
 
     // That's all folks
