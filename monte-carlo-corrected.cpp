@@ -4,6 +4,7 @@
 #include <blocked_range.h>
 #include <parallel_reduce.h>
 
+namespace {
     const double X_MIN = 2;
     const double X_MAX = 6;
     const double Y_MIN = 1;
@@ -14,16 +15,19 @@
         return a + (b - a) * rand() / RAND_MAX;
     }
 
+    /// Check if the point is below the upper function.
+    inline bool is_below_f1(const double x, const double y) {
+        return y <= fabs(x);
+    }
+
+    /// Check if the point is above the lower function.
+    inline bool is_above_f2(const double x, const double y) {
+        return y >= 1.5 * fabs(x) - 1;
+    }
+
     /// Check if the point is inside of the area.
     inline bool is_in_area(const double x, const double y) {
-        return ( (x <= 0)
-              && (y >= (-1.5 * x) - 1)
-              && (y <= -x)
-               )
-            || ( (x >= 0)
-              && (y >= ( 1.5 * x) - 1)
-              && (y <=  x)
-               );
+        return is_below_f1(x, y) && is_above_f2(x, y);
     }
 
     /// Perform the area computation within the given count range.
