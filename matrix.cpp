@@ -68,12 +68,12 @@ private:
         unit[i].swap(unit[j]);
     }
 
-    /// Find the row with maximal module element to the bottom of ith row
-    /// and swap it with ith row.
-    void find_max_down(size_t i) {
+    /// Find the row with maximal module element in rows [a, b)
+    /// and swap its row with ith row.
+    void find_max(size_t i, size_t a, size_t b) {
         size_t mj = i;
         double m = fabs(mat[i][i]);
-        for (size_t j = i + 1; j < mat.size(); ++j) {
+        for (size_t j = a; j < b; ++j) {
             double x = fabs(mat[j][i]);
             if (x > m) {
                 m = x;
@@ -85,57 +85,26 @@ private:
         }
     }
 
-    /// Find the row with maximal module element to the top of ith row
-    /// and swap it with ith row.
-    void find_max_up(size_t i) {
-        size_t mj = i;
-        double m = fabs(mat[i][i]);
-        for (size_t j = i; j > 0; --j) {
-            double x = fabs(mat[j - 1][i]);
-            if (x > m) {
-                m = x;
-                mj = j - 1;
-            }
-        }
-        if (mj != i) {
-            swap_rows(mj, i);
-        }
-    }
-
-    /// Subtract ith row from all rows to the bottom of it
+    /// Subtract ith row from all rows in [a, b)
     /// to zero ith element of them. Copy same operations
     /// on the unit matrix.
-    void subtract_down(size_t i) {
+    void subtract_all(size_t i, size_t a, size_t b) {
         double relem = 1.0 / mat[i][i];
         multiply(mat[i], relem);
         multiply(unit[i], relem);
-        for (size_t j = i + 1; j < mat.size(); ++j) {
+        for (size_t j = a; j < b; ++j) {
             double coeff = mat[j][i];
             subtract(mat[j], mat[i], coeff);
             subtract(unit[j], unit[i], coeff);
         }
-    }
 
-    /// Subtract ith row from all rows to the top of it
-    /// to zero ith element of them. Copy same operations
-    /// on the unit matrix.
-    void subtract_up(size_t i) {
-        double relem = 1.0 / mat[i][i];
-        multiply(mat[i], relem);
-        multiply(unit[i], relem);
-        for (size_t j = i; j > 0; --j) {
-            double coeff = mat[j - 1][i];
-            subtract(mat[j - 1], mat[i], coeff);
-            subtract(unit[j - 1], unit[i], coeff);
-        }
     }
-
     /// Gauss method top-to-bottom pass.
     /// Duplicate on unit matrix.
     void gauss_down() {
         for (size_t i = 0; i < mat.size(); ++i) {
-            find_max_down(i);
-            subtract_down(i);
+            find_max(i, i + 1, mat.size());
+            subtract_all(i, i + 1, mat.size());
         }
     }
 
@@ -143,8 +112,8 @@ private:
     /// Duplicate on unit matrix.
     void gauss_up() {
         for (size_t i = mat.size(); i > 0; --i) {
-            find_max_up(i - 1);
-            subtract_up(i - 1);
+            find_max(i - 1, 0, i - 1);
+            subtract_all(i - 1, 0, i - 1);
         }
     }
 
