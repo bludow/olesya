@@ -5,7 +5,7 @@ double integral_gauss_phi0(double r_max, double b) {
 	double sum  = 0.;
 	double V = potential();
 	double E = ...;
-	//2 - порядок метода 
+	//3 - порядок метода 
 	for (double i = a; i < 2; ++i) {
 		if (i == b) {/*stop*/;  }
 		else {
