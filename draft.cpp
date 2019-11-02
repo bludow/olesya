@@ -7,8 +7,6 @@ double integral_gauss_phi0(double r_max, double b) {
 	double E = ...;
 	//3 - порядок метода 
 	for (double i = a; i < 2; ++i) {
-		if (i == b) {/*stop*/;  }
-		else {
 			double r1 = ((a + b) / 2.) - (b - a) / (2. * sqrt(3.));
 			double dr1 = ... ;
 			double fun1 = ((b / r1 * r1) / sqrt((1 - b * b) / r1 * r1 - (V / E))) * dr1;
@@ -20,7 +18,6 @@ double integral_gauss_phi0(double r_max, double b) {
 
 			double r = fun1 + fun2;
 			sum += ((b - a) / 2.) * (((b / r1 * r1) / sqrt((1 - b * b) / r1 * r1 - (V / E))) * dr1);
-		}
 	}
 
 }
